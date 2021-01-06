@@ -4,3 +4,4 @@
 2. **Predict adr** of each request.
 3. Sum up (adr * ataying days) of each request to get daily revenue, and **predict the scale**.
 99. YEEEEEEE
+100. YAAAA
