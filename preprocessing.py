@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 
-
+feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
+feature_del            = ['company']
+feature_fillna         = ['agent']
 
 def count_features(df:pd.DataFrame):
     """
@@ -16,7 +18,7 @@ def count_features(df:pd.DataFrame):
     for key in d:
         print("{0} has {1} entities".format(key, d[key]))
 
-def drop_useless(df:pd.DataFrame):
+def drop_useless_entry(df:pd.DataFrame):
     '''
         This function drops the invalid entries for dataframe.
     '''
@@ -29,6 +31,18 @@ def drop_useless(df:pd.DataFrame):
     this_df = df.drop(drop_index)
     return this_df
 
+def fill_na(df:pd.DataFrame, number=0):
+    return df[feature_fillna].fillna(number)
+    
+
+
+def drop_feature(df:pd.DataFrame):
+    return df.drop(feature_del)
+
+
+
+
+
 
 def messager(a:str):
     print("##########################################{0}##############################".format(a))
@@ -38,13 +52,19 @@ if __name__ == '__main__':
     train_df = pd.read_csv("Dataset/train.csv")
     test_df  = pd.read_csv("Dataset/test.csv")
 
-    messager("Train_DF")
-    count_features(train_df)
+    '''
+        drop the features listed on *feature_del*
+    '''
+    train_df = drop_feature(train_df)
+    test_df  = drop_feature(test_df)
 
-    messager("Test_DF")
-    count_features(test_df)
+    '''
+        replace NaN with a specified number
+    '''
+    train_df = fill_na(train_df, number=0)
+    test_df  = fill_na(test_df,  number=0)
 
-    messager("Train_DF after Dropping")
-    train_df = drop_useless(train_df)
-    count_features(train_df)
-    
+
+    train_df = drop_useless_entry(train_df)
+    test_df  = drop_useless_entry(test_df)
+
