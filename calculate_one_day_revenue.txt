@@ -1,0 +1,30 @@
+import numpy as np
+import pandas as pd
+df_train_data = pd.read_csv("train.csv")
+
+year_array = [2015,2016,2017]
+month_array = ["July","August","September","October","November","December","January","February","March"
+        ,"April","May","June"]
+day_array = np.arange(1,32)
+oneday_revenue = np.zeros(640)
+m = 0
+for i in range(len(year_array)):
+    for j in range(len(month_array)):
+         for k in range(len(day_array)):
+                A = df_train_data[df_train_data.arrival_date_year == year_array[i]]
+                B = A.loc[A.arrival_date_month == month_array[j]]
+                C = B.loc[B.arrival_date_day_of_month == day_array[k]]
+
+                C_stays_in_weekend_nights = C["stays_in_weekend_nights"]
+                C_stays_in_week_nights = C["stays_in_week_nights"]
+                C_adr = C["adr"]
+                C_stays_in_weekend_nights = np.array(C_stays_in_weekend_nights)
+                C_stays_in_week_nights = np.array(C_stays_in_week_nights)
+                C_stays_days_total = C_stays_in_weekend_nights + C_stays_in_week_nights
+                C_adr = np.array(C_adr)
+                C_total_revenue_oneday = np.dot(C_stays_days_total,C_adr)
+                if C_total_revenue_oneday != 0:
+                    oneday_revenue[m] = C_total_revenue_oneday
+                    m = m + 1
+                    
+oneday_revenue
