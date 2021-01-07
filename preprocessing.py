@@ -5,6 +5,10 @@ feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previo
 feature_del            = ['company']
 feature_fillna         = ['agent']
 
+feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
+                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'reservation_status']
+
+
 def count_features(df:pd.DataFrame):
     """
         This function computes the valid entries for specified column.
