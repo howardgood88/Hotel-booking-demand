@@ -6,7 +6,7 @@ feature_del            = ['company']
 feature_fillna         = ['agent']
 
 feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
-                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'reservation_status']
+                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type']
 
 
 def count_features(df:pd.DataFrame):
