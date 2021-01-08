@@ -7,6 +7,10 @@ import pandas as pd
 ############################################################################################################################################
 
 
+def messager(a:str):
+    print("#" * 20, a, "#" * 20)
+
+
 def count_features(df:pd.DataFrame):
     """
         This function computes the valid entries for specified column.
@@ -84,6 +88,20 @@ def drop_useless_entry(df:pd.DataFrame):
     return this_df
 
 
+def fill_na(df:pd.DataFrame, number:int = 0):
+    '''
+        This function replace the NaN with the speicified number for the columns listed in the feature_fillna.
+    '''
+    return df[feature_fillna].fillna(number)
+    
+
+def drop_feature(df:pd.DataFrame):
+    '''
+        This function removes the columns listed in the feature_del.
+    '''
+    return df.drop(feature_del)
+
+
 @print_shape_change
 def ont_hot(df:pd.DataFrame):
     '''
@@ -98,6 +116,10 @@ def ont_hot(df:pd.DataFrame):
     return df
 
 
+def one_hot(df:pd.DataFrame):
+    return pd.get_dummies(df[feature_one_hot])
+
+
 ############################################################################################################################################
 #                                                           Main
 ############################################################################################################################################
@@ -110,7 +132,7 @@ feature_fillna         = ['agent']
 feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
                         'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
 
-    
+
 if __name__ == '__main__':
     train_df = pd.read_csv("Dataset/train.csv")
     test_df  = pd.read_csv("Dataset/test.csv")
