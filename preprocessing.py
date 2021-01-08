@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 
 
-############################################################################################################################################
-#                                                             Utilities
-############################################################################################################################################
+###################################################################
+#                             Utilities
+###################################################################
 
 
 def messager(a:str):
@@ -77,9 +77,9 @@ def print_nan_count(f):
     return decorator
 
 
-############################################################################################################################################
-#                                                           Data processing
-############################################################################################################################################
+###################################################################
+#                      Data processing
+###################################################################
     
 
 @print_shape_change
@@ -125,7 +125,7 @@ def add_room_change_feature(df:pd.DataFrame):
 
 
 def one_hot(df:pd.DataFrame):
-    return pd.get_dummies(df[feature_one_hot])
+    return pd.get_dummies(df)
 
 
 @print_shape_change
@@ -151,17 +151,17 @@ def one_hot_encoding(df1:pd.DataFrame, df2:pd.DataFrame):
     return df1, df2
 
 
-############################################################################################################################################
-#                                                           Main
-############################################################################################################################################
+###################################################################
+#                            Main
+###################################################################
 
 
 feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
-feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
-                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
-
+# feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
+#                         'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
+feature_one_hot = 'agent'
 
 if __name__ == '__main__':
     train_df = pd.read_csv("Dataset/train_day_of_week.csv")
@@ -179,7 +179,8 @@ if __name__ == '__main__':
     train_df = add_room_change_feature(train_df)
     test_df = add_room_change_feature(test_df)
 
+    # print(pd.get_dummies(train_df[feature_one_hot]).shape)
     train_df, test_df = one_hot_encoding(train_df, test_df)
 
-    train_df.to_csv('Dataset/train_final.csv', index=False)
-    test_df.to_csv('Dataset/test_final.csv', index=False)
+    train_df.to_csv('Dataset/train_final2.csv', index=False)
+    # test_df.to_csv('Dataset/test_final.csv', index=False)
