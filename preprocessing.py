@@ -63,9 +63,8 @@ def print_nan_count(f):
 
         obj = f(*args, **kwargs)
         # To make single return value act the same with multi return value 
-        if type(args) != tuple:
-            args = [args]
-
+        args = [args] if type(args) != tuple else arg
+        
         for idx, arg in enumerate(args):
             print('[Function {}] arg{} NaN from {} to {}'.format(f.__name__, idx, before_na[idx], obj[feature_fillna].isna().values.sum()))
 
