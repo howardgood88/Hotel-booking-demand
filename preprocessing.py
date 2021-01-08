@@ -125,7 +125,7 @@ def add_room_change_feature(df:pd.DataFrame):
 
 
 def one_hot(df:pd.DataFrame):
-    return pd.get_dummies(df[feature_one_hot])
+    return pd.get_dummies(df.astype(str))
 
 
 @print_shape_change
