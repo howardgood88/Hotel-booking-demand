@@ -159,9 +159,9 @@ def one_hot_encoding(df1:pd.DataFrame, df2:pd.DataFrame):
 feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
-# feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
-#                         'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
-feature_one_hot = 'agent'
+feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
+                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
+
 
 if __name__ == '__main__':
     train_df = pd.read_csv("Dataset/train_day_of_week.csv")
@@ -179,8 +179,7 @@ if __name__ == '__main__':
     train_df = add_room_change_feature(train_df)
     test_df = add_room_change_feature(test_df)
 
-    # print(pd.get_dummies(train_df[feature_one_hot]).shape)
     train_df, test_df = one_hot_encoding(train_df, test_df)
 
-    train_df.to_csv('Dataset/train_final2.csv', index=False)
-    # test_df.to_csv('Dataset/test_final.csv', index=False)
+    train_df.to_csv('Dataset/train_final.csv', index=False)
+    test_df.to_csv('Dataset/test_final.csv', index=False)
