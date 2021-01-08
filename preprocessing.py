@@ -4,9 +4,8 @@ import pandas as pd
 feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
-
 feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
-                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type']
+                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
 
 
 def count_features(df:pd.DataFrame):
@@ -22,6 +21,7 @@ def count_features(df:pd.DataFrame):
     for key in d:
         print("{0} has {1} entities".format(key, d[key]))
 
+
 def drop_useless_entry(df:pd.DataFrame):
     '''
         This function drops the invalid entries for dataframe.
@@ -35,21 +35,34 @@ def drop_useless_entry(df:pd.DataFrame):
     this_df = df.drop(drop_index)
     return this_df
 
-def fill_na(df:pd.DataFrame, number=0):
+
+def fill_na(df:pd.DataFrame, number:int = 0):
+    '''
+        This function replace the NaN with the speicified number for the columns listed in the feature_fillna.
+    '''
     return df[feature_fillna].fillna(number)
     
 
-
 def drop_feature(df:pd.DataFrame):
+    '''
+        This function removes the columns listed in the feature_del.
+    '''
     return df.drop(feature_del)
 
 
+def one_hot(df:pd.DataFrame):
+    return pd.get_dummies(df[feature_one_hot])
 
 
+def concatenate(df1:pd.DataFrame, df2:pd.DataFrame):
+    '''
+        This function concates two dataframes.
+    '''
+    return pd.concat((df1, df2))
 
 
 def messager(a:str):
-    print("##########################################{0}##############################".format(a))
+    print("#" * 20, a, "#" * 20)
 
     
 if __name__ == '__main__':
