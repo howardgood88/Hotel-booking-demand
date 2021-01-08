@@ -1,5 +1,5 @@
 # Day_of_week
-* This is a file of Description of day_of_the_week cloumn in train and test
+* This is a file of Description of ```day_of_the_week``` and ```concat_date``` cloumn in train and test
 ## Goal
 * Add the feature: day of the week to train and test data.
 ## Method
