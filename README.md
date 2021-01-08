@@ -10,4 +10,3 @@ description: https://www.csie.ntu.edu.tw/~htlin/course/ml20fall/project/project.
 100. YAAAA
 101. Hello
 102. 156
-103. Ace
