@@ -4,6 +4,7 @@ import numpy as np
 DATA_TRAIN = "Dataset\\train_final.csv"
 DATA_TEST  = "Dataset\\test_final.csv"
 
+feature_drop = ['ID']
 
 def read_file(path):
     return pd.read_csv(path)
