@@ -37,15 +37,13 @@ def print_shape_change(f):
 
         args = f(*args, **kwargs)
         # To make single return value act the same with multi return value 
-        if type(args) != tuple:
-            args = [args]
+        args = [args] if type(args) != tuple else args
 
         for idx, arg in enumerate(args):
             print('[Function {}] arg{} shape from {} to {}'.format(f.__name__, idx, before_shape[idx], arg.shape))
 
         # Recover the change on single return value
-        if type(args) == list:
-            args = args[0]
+        args = args[0] if type(args) == list else args
 
         return args
     return decorator
@@ -61,18 +59,17 @@ def print_nan_count(f):
             na = args[0][feature_fillna].isna().values.sum()
             before_na.append(na)
 
-        obj = f(*args, **kwargs)
+        args = f(*args, **kwargs)
         # To make single return value act the same with multi return value 
-        args = [args] if type(args) != tuple else arg
-        
+        args = [args] if type(args) != tuple else args
+
         for idx, arg in enumerate(args):
-            print('[Function {}] arg{} NaN from {} to {}'.format(f.__name__, idx, before_na[idx], obj[feature_fillna].isna().values.sum()))
+            print('[Function {}] arg{} NaN from {} to {}'.format(f.__name__, idx, before_na[idx], arg[feature_fillna].isna().values.sum()))
 
         # Recover the change on single return value
-        if type(args) == list:
-            args = args[0]
+        args = args[0] if type(args) == list else args
 
-        return obj
+        return args
     return decorator
 
 
