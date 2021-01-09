@@ -13,9 +13,12 @@ def read_file(path):
     return pd.read_csv(path)
 
 
-def get_data():
-    return read_file(DATA_TRAIN).drop(feature_train_drop), read_file(DATA_TEST).drop(feature_test_drop)
+def get_train():
+    return read_file(DATA_TRAIN).drop(feature_train_drop), read_file(DATA_TEST)
 
+
+def get_test():
+    return read_file(DATA_TEST).drop(feature_test_drop)
 
 
     
