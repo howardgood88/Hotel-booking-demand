@@ -24,6 +24,8 @@ if __name__ == '__main__':
     X = train_x.drop(drop_features, axis=1)
     print('Input data shape:', X.shape)
 
+    if not os.path.isdir(folderpath):
+        os.mkdir('Joblib')
     # Train is_canceled
     if os.path.isfile('Joblib/is_canceled.joblib'):
         print('Model is_canceled.joblib detected, loading...')
