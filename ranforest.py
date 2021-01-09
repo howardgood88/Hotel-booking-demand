@@ -30,8 +30,9 @@ def get_model(model_name, path):
     return False
 
 
+MODE = 0
 
-if __name__ == '__main__':
+if __name__ == '__main__' and MODE:
     # Read data
     train_x, train_y, test_x, test_y = util.get_data()
     scale_label = train_y['label']
@@ -102,3 +103,37 @@ if __name__ == '__main__':
         print('accuracy scale:', clf3.score(daily_revenue_list[:, np.newaxis], scale_label))
         dump(clf3, 'Joblib/scale.joblib')
         print('Model saved as Joblib/scale.joblib')
+
+if __name__ == '__main__' and MODE != 1:
+    drop_features = ['ID', 'arrival_date_week_number','concat_date']
+    test_x, test_y = util.get_test()
+
+    clf1 = load('Joblib/is_canceled.joblib')
+    clf2 = load('Joblib/adr.joblib')
+    clf3 = load('Joblib/scale.joblib')
+
+    test_x = test_x.drop(drop_features, axis=1)
+    is_canceled = clf1.predict(test_x)
+
+    adr = clf2.predict(test_x)
+    
+    stay_nights = test_x['stays_in_weekend_nights'] + test_x['stays_in_week_nights']
+    request_revenue = adr * stay_nights
+    days = test_x.filter(regex=('arrival_date_day_of_month_*'))
+    daily_revenue = 0
+    daily_revenue_list = []
+    for idx in range(len(days)):
+        if idx > 0 and not days.iloc[idx].equals(days.iloc[idx-1]):
+            daily_revenue_list.append(daily_revenue)
+            daily_revenue = 0
+        else:
+            daily_revenue += request_revenue[idx]
+    daily_revenue_list.append(daily_revenue)
+    daily_revenue_list = np.array(daily_revenue_list)
+    assert(len(daily_revenue_list) == len(test_y))
+    print('daily revenue calculate finished...')
+
+    A = clf3.predict(daily_revenue_list[:, np.newaxis])
+    result = pd.DataFrame({'label': A})
+    r = pd.concat([test_y, result], axis=1)
+    r.to_csv('result.csv', index=False)

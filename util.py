@@ -17,5 +17,8 @@ def get_data():
     return read_file(DATA_TRAIN), read_file(LABEL_DATA_TRAIN), \
             read_file(DATA_TEST), read_file(LABEL_DATA_TEST)
 
+def get_test():
+    return read_file(DATA_TEST), read_file(LABEL_DATA_TEST)
+
 
     
