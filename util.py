@@ -1,24 +1,21 @@
 import pandas as pd
 import numpy as np
 
-DATA_TRAIN   = "Dataset\\train_final.csv"
-DATA_TRAIN_Y = "Dataset\\train_label.csv"
-DATA_TEST    = "Dataset\\test_final.csv"
+DATA_TRAIN = 'Dataset/train_final.csv'
+LABEL_DATA_TRAIN = 'Dataset/train_label.csv'
 
-feature_train_drop = ['ID', 'reservation_status', 'reservation_status_date', 'concat_date']
-feature_test_drop  = ['ID', 'concat_date']
+DATA_TEST  = 'Dataset/test_final.csv'
+LABEL_DATA_TEST  = 'Dataset/test_nolabel.csv'
 
+feature_drop = ['ID']
 
 def read_file(path):
     return pd.read_csv(path)
 
 
-def get_train():
-    return read_file(DATA_TRAIN).drop(feature_train_drop), read_file(DATA_TEST)
-
-
-def get_test():
-    return read_file(DATA_TEST).drop(feature_test_drop)
+def get_data():
+    return read_file(DATA_TRAIN), read_file(LABEL_DATA_TRAIN), \
+            read_file(DATA_TEST), read_file(LABEL_DATA_TEST)
 
 
     
