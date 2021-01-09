@@ -1,2 +1,5 @@
 Dataset/train_final.csv
 Dataset/test_final.csv
+__pycache__
+Joblib/*
+result.csv
