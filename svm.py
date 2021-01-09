@@ -23,12 +23,12 @@ if __name__ == '__main__':
     print('Input data shape:', X.shape)
 
     # Train is_canceled
-    clf = make_pipeline(MinMaxScaler(), SVC())
+    clf = make_pipeline(MinMaxScaler(), SVC(verbose=True), verbose=True)
     clf.fit(X, is_canceled)
     print('is_canceled training finished...')
 
     # Train adr
-    clf2 = make_pipeline(MinMaxScaler(), SVR())
+    clf2 = make_pipeline(MinMaxScaler(), SVR(verbose=True), verbose=True)
     clf2.fit(X, adr)
     print('adr training finished...')
 
@@ -48,6 +48,6 @@ if __name__ == '__main__':
     print('daily revenue calculate finished...')
 
     # Train scale
-    clf3 = make_pipeline(MinMaxScaler(), SVR())
+    clf3 = make_pipeline(MinMaxScaler(), SVR(verbose=True), verbose=True)
     clf3.fit(daily_revenue_list, scale_label)
     print('scale training finished...')
