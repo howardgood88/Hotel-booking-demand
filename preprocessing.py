@@ -155,13 +155,14 @@ def one_hot_encoding(df1:pd.DataFrame, df2:pd.DataFrame):
 feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
-feature_one_hot        = ['hotel', 'arrival_date_month', 'meal', 'country', 'market_segment', 'distribution_channel', 'reserved_room_type',
-                        'assigned_room_type', 'deposit_type', 'agent', 'customer_type', 'day_of_the_week']
+feature_one_hot        = ['hotel', 'arrival_date_year', 'arrival_date_month', 'arrival_date_day_of_month', 'meal', 'country',
+                        'market_segment', 'distribution_channel', 'reserved_room_type','assigned_room_type', 'deposit_type',
+                        'agent', 'customer_type', 'day_of_the_week']
 
 
 if __name__ == '__main__':
-    train_df = pd.read_csv("Dataset/train_day_of_week.csv")
-    test_df  = pd.read_csv("Dataset/test_day_of_week.csv")
+    train_df = pd.read_csv('Dataset/train_day_of_week.csv')
+    test_df  = pd.read_csv('Dataset/test_day_of_week.csv')
     
     train_df = drop_feature(train_df)
     test_df  = drop_feature(test_df)
