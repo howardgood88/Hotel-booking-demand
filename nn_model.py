@@ -6,15 +6,15 @@ import torch.nn.functional as F
 
 # model structure
 class linearRegression(torch.nn.Module):
-    def __init__(self, n_feature, n_hidden, n_output):
+    def __init__(self, n_feature, n_output):
         super(linearRegression, self).__init__()
         self.linear = nn.Sequential(
-            nn.Linear(n_feature, n_hidden),
-            nn.Linear(n_hidden, n_hidden),
+            nn.Linear(n_feature, 500),
+            nn.Linear(500, 500),
             nn.ReLU(),
-            nn.Linear(n_hidden, n_hidden),
+            nn.Linear(500, 100),
             nn.Dropout(p=0.3),
-            nn.Linear(n_hidden, n_output)
+            nn.Linear(100, n_output)
         )
             
 

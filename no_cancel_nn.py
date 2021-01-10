@@ -69,45 +69,53 @@ outputDim = 1
 learningRate = 0.0001 
 epochs = 50
 
-model = linearRegression(inputDim, 1000, outputDim)
+model = linearRegression(inputDim, outputDim)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 loss_func = torch.nn.BCEWithLogitsLoss()
 
-trainset = dataset(x_df_train,y_df_train)
-trainloader = DataLoader(trainset,batch_size=64,shuffle=False)
-validset = dataset(x_df_valid,y_df_valid)
-validloader = DataLoader(validset,batch_size=64,shuffle=False)
+# trainset = dataset(x_df_train,y_df_train)
+# trainloader = DataLoader(trainset,batch_size=64,shuffle=False)
+# validset = dataset(x_df_valid,y_df_valid)
+# validloader = DataLoader(validset,batch_size=64,shuffle=False)
 
 loss_train = []
 loss_valid = []
 acc_train = []
 acc_valid = []
 for t in range(epochs):
-    for (x_train, y_train) in trainloader:
-        model.train()
-        # x_train = Variable(torch.from_numpy(x_df_train.values).float())
-        # y_train = Variable(torch.from_numpy(y_df_train.values).float())
-        y_train = y_train.view(-1,1)
-        prediction = model(x_train)
-        loss = loss_func(prediction, y_train)
-        loss_train.append(loss.detach().numpy())
-        acc = (prediction.reshape(-1).detach().numpy().round() == y_train.reshape(-1).detach().numpy()).mean()
-        acc_train.append(acc)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+    # tmp_acc = []
+    # for (x_train, y_train) in trainloader:
+    model.train()
+    x_train = Variable(torch.from_numpy(x_df_train.values).float())
+    y_train = Variable(torch.from_numpy(y_df_train.values).float())
+    y_train = y_train.view(-1,1)
+    prediction = model(x_train)
+    loss = loss_func(prediction, y_train)
+    loss_train.append(loss.detach().numpy())
+    acc = (prediction.reshape(-1).detach().numpy().round() == y_train.reshape(-1).detach().numpy()).mean()
+    acc_train.append(acc)
+    # tmp_acc.append(acc)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    # acc = sum(tmp_acc)/len(tmp_acc)
+    # acc_train.append(acc)
 
-    for (x_valid, y_valid) in validloader:
-        model.eval()
-        # x_valid = Variable(torch.from_numpy(x_df_valid.values).float())
-        # y_valid = Variable(torch.from_numpy(y_df_valid.values).float())
-        y_valid = y_valid.view(-1,1)
-        prediction = model(x_valid)
-        vloss = loss_func(prediction, y_valid)
-        loss_valid.append(vloss)
-        vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid.reshape(-1).detach().numpy()).mean()
-        acc_valid.append(vacc)
+    # tmp_vacc = []
+    # for (x_valid, y_valid) in validloader:
+    model.eval()
+    x_valid = Variable(torch.from_numpy(x_df_valid.values).float())
+    y_valid = Variable(torch.from_numpy(y_df_valid.values).float())
+    y_valid = y_valid.view(-1,1)
+    prediction = model(x_valid)
+    vloss = loss_func(prediction, y_valid)
+    loss_valid.append(vloss)
+    vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid.reshape(-1).detach().numpy()).mean()
+    # tmp_vacc.append(vacc)
+    acc_valid.append(vacc)
 
+    # vacc = sum(tmp_vacc)/len(tmp_vacc)
+    # acc_valid.append(vacc)
     print('epoch = {}, train_loss = {}, train_acc = {}, valid_loss = {}, valid_acc = {}'.format(t,loss.detach().numpy(),acc,vloss,vacc),end='\r')
 
 
