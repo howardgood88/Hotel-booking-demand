@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVC
 from sklearn.svm import SVR
+from sklearn.ensemble import BaggingClassifier
 from joblib import dump, load
 import os
 # from sklearn.model_selection import KFold
@@ -85,7 +86,9 @@ def train(X, y, model, task:str, verbose:bool=0):
         clf = load('Joblib/{}.joblib'.format(task))
         print(' Success.')
     else:
-        clf = make_pipeline(MinMaxScaler(), model(verbose=True), verbose=True)
+        scaling = MinMaxScaler().fit(X)
+        X = scaling.transform(X)
+        clf = BaggingClassifier(base_estimator=model(verbose=True), n_jobs=-1, verbose=True)
         clf.fit(X, y)
         print('{} training finished...'.format(task))
         dump(clf, 'Joblib/{}.joblib'.format(task))
