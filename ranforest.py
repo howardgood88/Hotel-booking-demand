@@ -2,10 +2,9 @@ import numpy as np
 import pandas as pd
 import util
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.svm import SVC
-from sklearn.svm import SVR
 from joblib import dump, load
 import os
 from sklearn.metrics import mean_absolute_error
