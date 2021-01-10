@@ -16,12 +16,19 @@ import os
 ###################################################################
 
 
-def get_daily_revenue(adr, stay_nights):
+def drop_cancel(X, is_canceled):
+    '''
+        Drop is_cancel by boolean index.
+    '''
+    drop_is_canceled = pd.Series([i != 1 for i in is_canceled])
+    return X[drop_is_canceled]
+
+
+def get_daily_revenue(adr, stay_nights, days):
     '''
         Calculate daily revenue.
     '''
     request_revenue = adr * stay_nights
-    days = train_x.filter(regex=('arrival_date_day_of_month_*'))
     daily_revenue = 0
     daily_revenue_list = []
     for idx in range(len(days)):
@@ -29,7 +36,7 @@ def get_daily_revenue(adr, stay_nights):
             daily_revenue_list.append(daily_revenue)
             daily_revenue = 0
         else:
-            daily_revenue += request_revenue[idx]
+            daily_revenue += request_revenue.iloc[idx]
     daily_revenue_list.append(daily_revenue)
     daily_revenue_list = np.array(daily_revenue_list)
     assert(len(daily_revenue_list) == len(train_y))
@@ -70,9 +77,9 @@ def train(X, y, model, task:str, verbose:bool=0):
     if os.path.isfile('Joblib/{}.joblib'.format(task)):
         print('Model {}.joblib detected, loading...'.format(task), end='')
         clf = load('Joblib/{}.joblib'.format(task))
-        print(' Success.')
+        print(' Success')
     else:
-        clf = make_pipeline(MinMaxScaler(), model(verbose=True), verbose=True)
+        clf = make_pipeline(MinMaxScaler(), model(max_iter=10, verbose=True), verbose=True)
         clf.fit(X, y)
         print('{} training finished...'.format(task))
         dump(clf, 'Joblib/{}.joblib'.format(task))
@@ -97,11 +104,12 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     clf = train(X, is_canceled, SVC, 'is_canceled')
     clf2 = train(X, adr, SVR, 'adr')
 
-    drop_is_canceled = pd.Series([i != 1 for i in is_canceled])
-    adr = adr[drop_is_canceled]
+    adr = drop_cancel(adr, is_canceled)
     stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
-    stay_nights = stay_nights[drop_is_canceled]
-    daily_revenue_list = get_daily_revenue(adr, stay_nights)
+    stay_nights = drop_cancel(stay_nights, is_canceled)
+    days = train_x.filter(regex=('arrival_date_day_of_month_*'))
+    days = drop_cancel(days, is_canceled)
+    daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
 
     clf3 = train(daily_revenue_list, train_y, SVC, 'scale')
 
