@@ -14,7 +14,7 @@ class linearRegression(torch.nn.Module):
             nn.ReLU(),
             nn.Linear(500, 100),
             nn.Dropout(p=0.3),
-            nn.Linear(100, n_output)
+            nn.Linear(100, n_output),
         )
             
 

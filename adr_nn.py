@@ -32,8 +32,8 @@ class dataset(Dataset):
 #                       Reading Data
 #################################################################
 
-y_label ='is_canceled'
-not_for_train = ['ID','adr','reservation_status','reservation_status_date','concat_date',
+y_label ='adr'
+not_for_train = ['ID','reservation_status','reservation_status_date','concat_date',
                 'arrival_date_year','arrival_date_week_number']
 # not_for_test = ['ID','concat_date','arrival_date_year','arrival_date_week_number']
 df_train = pd.read_csv('Dataset/train_final.csv')
@@ -67,12 +67,12 @@ print(x_df_train.values.shape, y_df_train.values.shape)
 inputDim = x_df_train.shape[1]
 outputDim = 1
 learningRate = 0.0001 
-epochs = 250
+epochs = 300
 
 model = linearRegression(inputDim, outputDim)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
-loss_func = torch.nn.L1Loss()
+loss_func = torch.nn.MSELoss()
 
 '''     for batch learning
 trainset = dataset(x_df_train,y_df_train)
@@ -83,11 +83,8 @@ validloader = DataLoader(validset,batch_size=64,shuffle=False)
 
 loss_train = []
 loss_valid = []
-acc_train = []
-acc_valid = []
 for t in range(epochs):
     '''
-    tmp_acc = []
     for (x_train, y_train) in trainloader:
     '''
     model.train()
@@ -97,19 +94,11 @@ for t in range(epochs):
     prediction = model(x_train)
     loss = loss_func(prediction, y_train)
     loss_train.append(loss.detach().numpy())
-    acc = (prediction.reshape(-1).detach().numpy().round() == y_train.reshape(-1).detach().numpy()).mean()
-    acc_train.append(acc)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-    '''
-    tmp_acc.append(acc)
-    acc = sum(tmp_acc)/len(tmp_acc)
-    acc_train.append(acc)
-    '''
 
     '''
-    tmp_vacc = []
     for (x_valid, y_valid) in validloader:
     '''
     model.eval()
@@ -119,23 +108,13 @@ for t in range(epochs):
     prediction = model(x_valid)
     vloss = loss_func(prediction, y_valid)
     loss_valid.append(vloss)
-    vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid.reshape(-1).detach().numpy()).mean()
-    acc_valid.append(vacc)
-    '''
-    tmp_vacc.append(vacc)
-    vacc = sum(tmp_vacc)/len(tmp_vacc)
-    acc_valid.append(vacc)
-    '''
+
     if t % 50 == 0:
-        print('epoch = {}, train_loss = {}, train_acc = {}, valid_loss = {}, valid_acc = {}'.format(t,loss.detach().numpy(),acc,vloss,vacc))
+        print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,loss.detach().numpy(),vloss))
 
 
 
 plt.plot(loss_train, label='train_loss')
 plt.plot(loss_train, label='valid_loss')
-plt.legend(loc='best')
-plt.show()
-plt.plot(acc_train, label='acc_train')
-plt.plot(acc_valid, label='acc_valid')
 plt.legend(loc='best')
 plt.show()
