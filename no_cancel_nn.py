@@ -11,11 +11,21 @@ import matplotlib.pyplot as plt
 #################################################################
 
 
-def accuracy_(outputs, labels):
-    outputs = outputs.detach().cpu()
-    labels = labels.detach().cpu()
-    _, preds = outputs.max(1)
-    return float(preds.eq(labels).sum()) / outputs.size(0)
+from torch.utils.data import Dataset, DataLoader
+
+class dataset(Dataset):
+    def __init__(self,x,y):
+        # self.x = torch.tensor(x,dtype=torch.float32)
+        self.x = Variable(torch.from_numpy(x.values).float())
+        # self.y = torch.tensor(y,dtype=torch.float32)
+        self.y = Variable(torch.from_numpy(y.values).float())
+        self.length = self.x.shape[0]
+    
+    def __getitem__(self,idx):
+        return self.x[idx],self.y[idx]
+
+    def __len__(self):
+        return self.length
 
 
 #################################################################
@@ -28,11 +38,10 @@ not_for_train = ['ID','adr','reservation_status','reservation_status_date','conc
 # not_for_test = ['ID','concat_date','arrival_date_year','arrival_date_week_number']
 df_train = pd.read_csv('Dataset/train_final.csv')
 # df_test = pd.read_csv('Dataset/test_final.csv')
-# 
+
 df_train.sample(frac=1)
 _ = [df_train.pop(x) for x in not_for_train]
 df_valid = df_train.iloc[81945:, :]
-print(type(df_valid))
 y_df_train = df_train.pop(y_label)
 y_df_valid = df_valid.pop(y_label)
 x_df_train = df_train
@@ -55,47 +64,56 @@ print(x_df_train.values.shape, y_df_train.values.shape)
 #     import sys
 #     sys.exit('Shape unmatch')
 
-inputDim = x_df_train.shape[1]        # takes variable 'x' 
-outputDim = 1       # takes variable 'y'
+inputDim = x_df_train.shape[1]
+outputDim = 1
 learningRate = 0.0001 
-epochs = 200
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+epochs = 50
 
 model = linearRegression(inputDim, 1000, outputDim)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
-loss_func = torch.nn.MSELoss()
+loss_func = torch.nn.BCEWithLogitsLoss()
+
+trainset = dataset(x_df_train,y_df_train)
+trainloader = DataLoader(trainset,batch_size=64,shuffle=False)
+validset = dataset(x_df_valid,y_df_valid)
+validloader = DataLoader(validset,batch_size=64,shuffle=False)
 
 loss_train = []
 loss_valid = []
+acc_train = []
+acc_valid = []
 for t in range(epochs):
-    x_train = Variable(torch.from_numpy(x_df_train.values).float())
-    y_train = Variable(torch.from_numpy(y_df_train.values).float())
-    y_train = y_train.view(-1,1)
+    for (x_train, y_train) in trainloader:
+        model.train()
+        # x_train = Variable(torch.from_numpy(x_df_train.values).float())
+        # y_train = Variable(torch.from_numpy(y_df_train.values).float())
+        y_train = y_train.view(-1,1)
+        prediction = model(x_train)
+        loss = loss_func(prediction, y_train)
+        loss_train.append(loss.detach().numpy())
+        acc = (prediction.reshape(-1).detach().numpy().round() == y_train)
+        acc_train.append(acc)
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-    model.train()
-    optimizer.zero_grad()
-    prediction = model(x_train)
-    loss = loss_func(prediction, y_train)
-    loss.backward()
-    loss_train.append(loss.detach().numpy())
-    optimizer.step()
+    for (x_valid, y_valid) in validloader:
+        model.eval()
+        # x_valid = Variable(torch.from_numpy(x_df_valid.values).float())
+        # y_valid = Variable(torch.from_numpy(y_df_valid.values).float())
+        y_valid = y_valid.view(-1,1)
+        prediction = model(x_valid)
+        vloss = loss_func(prediction, y_valid)
+        loss_valid.append(vloss)
+        vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid)
+        acc_valid.append(vacc)
 
-    model.eval()
-    x_valid = Variable(torch.from_numpy(x_df_valid.values).float())
-    y_valid = Variable(torch.from_numpy(y_df_valid.values).float())
-    y_valid = y_valid.view(-1,1)
-    prediction = model(x_valid)
-    vloss = loss_func(prediction, y_valid)
-    loss_valid.append(vloss.detach().numpy())
-
-    print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,loss.detach().numpy(),vloss.detach().numpy()),end='\r')
-
-
+    print('epoch = {}, train_loss = {}, train_acc = {}, valid_loss = {}, valid_acc = {}'.format(t,loss.detach().numpy(),acc,vloss,vacc),end='\r')
 
 
 plt.plot(loss_train, label='train_loss')
 plt.plot(loss_train, label='valid_loss')
+plt.plot(acc_train, label='acc_train')
+plt.plot(acc_valid, label='acc_valid')
 plt.legend(loc='best')
 plt.show()
-
-
