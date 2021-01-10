@@ -7,7 +7,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from joblib import dump, load
 import os
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, make_scorer
 
 
 ###################################################################
@@ -98,6 +98,8 @@ def train(X, y, model, task:str):
         print(' Success')
     else:
         clf = make_pipeline(MinMaxScaler(), model(n_jobs=-1, verbose=True), verbose=True)
+        score = make_scorer(mean_absolute_error)
+        print(cross_val_score(clf, X, y, cv=5, scoring=score))
         clf.fit(X, y)
         print('{} training finished...'.format(task))
         dump(clf, 'Joblib/{}.joblib'.format(task))
