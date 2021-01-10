@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 #################################################################
 
 
-from torch.utils.data import Dataset, DataLoader
+np.random.seed(987)
+torch.manual_seed(987)
 
+from torch.utils.data import Dataset, DataLoader
 class dataset(Dataset):
     def __init__(self,x,y):
         # self.x = torch.tensor(x,dtype=torch.float32)
@@ -70,6 +72,7 @@ learningRate = 0.0001
 epochs = 250
 
 model = BinaryClassifier(inputDim, outputDim)
+print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
 loss_func = torch.nn.MSELoss()
@@ -97,12 +100,11 @@ for t in range(epochs):
     prediction = model(x_train)
     loss = loss_func(prediction, y_train)
     tloss = loss.detach().numpy()
-    loss.backward()
     loss_train.append(tloss)
     acc = (prediction.reshape(-1).detach().numpy().round() == y_train.reshape(-1).detach().numpy()).mean()
     acc_train.append(acc)
     optimizer.zero_grad()
-    
+    loss.backward()
     optimizer.step()
     '''
     tmp_acc.append(acc)

@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 #################################################################
 
 
-from torch.utils.data import Dataset, DataLoader
+np.random.seed(987)
+torch.manual_seed(987)
 
+from torch.utils.data import Dataset, DataLoader
 class dataset(Dataset):
     def __init__(self,x,y):
         # self.x = torch.tensor(x,dtype=torch.float32)
@@ -70,6 +72,7 @@ learningRate = 0.0001
 epochs = 250
 
 model = linearRegression(inputDim, outputDim)
+print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
 loss_func = torch.nn.L1Loss()

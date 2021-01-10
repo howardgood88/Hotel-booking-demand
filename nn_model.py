@@ -26,7 +26,7 @@ class linearRegression(torch.nn.Module):
 # model structure
 class BinaryClassifier(torch.nn.Module):
     def __init__(self, n_feature, n_output):
-        super(linearRegression, self).__init__()
+        super(BinaryClassifier, self).__init__()
         self.linear = nn.Sequential(
             nn.Linear(n_feature, 500),
             nn.Linear(500, 500),
