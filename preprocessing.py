@@ -1,14 +1,11 @@
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import LabelEncoder
 
 
 ###################################################################
 #                             Utilities
 ###################################################################
-
-
-def messager(a:str):
-    print("#" * 20, a, "#" * 20)
 
 
 def count_features(df:pd.DataFrame):
@@ -147,18 +144,47 @@ def one_hot_encoding(df1:pd.DataFrame, df2:pd.DataFrame):
     return df1, df2
 
 
+@print_shape_change
+def label_encode(df1:pd.DataFrame, df2:pd.DataFrame):
+    '''
+        One-hot encoding for the features listed in *feature_label_encode*.
+    '''
+    features_df1 = df1[feature_label_encode]
+    features_df2 = df2[feature_label_encode]
+
+    num = features_df1.shape[0]
+    label_encode_pd = pd.concat([features_df1, features_df2])
+
+    le = LabelEncoder()
+    for feature in feature_label_encode:
+        label_encode_pd[feature] = le.fit_transform(label_encode_pd[feature])
+
+    label_encode_pd1 = label_encode_pd.iloc[:num]
+    label_encode_pd2 = label_encode_pd.iloc[num:]
+
+    df1 = df1.drop(feature_label_encode, axis=1)
+    df2 = df2.drop(feature_label_encode, axis=1)
+
+    df1 = pd.concat([df1, label_encode_pd1], axis=1)
+    df2 = pd.concat([df2, label_encode_pd2], axis=1)
+    return df1, df2
+
+
 ###################################################################
 #                            Main
 ###################################################################
 
 
-feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
 feature_one_hot        = ['hotel', 'arrival_date_year', 'arrival_date_month', 'arrival_date_day_of_month', 'meal', 'country',
                         'market_segment', 'distribution_channel', 'reserved_room_type','assigned_room_type', 'deposit_type',
                         'agent', 'customer_type', 'day_of_the_week']
+feature_label_encode   = ['hotel', 'arrival_date_month', 'meal', 'country',
+                        'market_segment', 'distribution_channel', 'reserved_room_type',
+                        'assigned_room_type', 'deposit_type', 'customer_type']
 
+encoding_mode = 'label_encode'
 
 if __name__ == '__main__':
     train_df = pd.read_csv('Dataset/train_day_of_week.csv')
@@ -176,7 +202,12 @@ if __name__ == '__main__':
     train_df = add_room_change_feature(train_df)
     test_df = add_room_change_feature(test_df)
 
-    train_df, test_df = one_hot_encoding(train_df, test_df)
+    if encoding_mode == 'one_hot':
+        train_df, test_df = one_hot_encoding(train_df, test_df)
+    elif encoding_mode == 'label_encode':
+        train_df, test_df = label_encode(train_df, test_df)
+    else:
+        raise NameError('Wrong encoding mode name:', encoding_mode)
 
     train_df.to_csv('Dataset/train_final.csv', index=False)
     test_df.to_csv('Dataset/test_final.csv', index=False)

@@ -88,7 +88,7 @@ def eval(X, y, clf):
 ###################################################################
 
 
-def train(X, y, model, task:str):
+def train(X, y, model, n_estimators_list:list, task:str):
     '''
         Train task by model.
     '''
@@ -97,9 +97,18 @@ def train(X, y, model, task:str):
         clf = load('Joblib/{}.joblib'.format(task))
         print(' Success')
     else:
-        clf = make_pipeline(MinMaxScaler(), model(n_jobs=-1, verbose=True), verbose=True)
-        score = make_scorer(mean_absolute_error)
-        print(cross_val_score(clf, X, y, cv=5, scoring=score))
+        min_val_score = float('inf')
+        for n_estimators in n_estimators_list:
+            clf = make_pipeline(MinMaxScaler(), model(n_estimators, n_jobs=-1))
+            score = make_scorer(mean_absolute_error)
+            val_score = cross_val_score(clf, X, y, cv=5, scoring=score).mean()
+
+            if val_score < min_val_score:
+                min_val_score = val_score
+                best_n_estimators = n_estimators
+        print('The n_estimators be chose:', best_n_estimators)
+        print('The minimum validation score:', min_val_score)
+        clf = make_pipeline(MinMaxScaler(), model(best_n_estimators, n_jobs=-1))
         clf.fit(X, y)
         print('{} training finished...'.format(task))
         dump(clf, 'Joblib/{}.joblib'.format(task))
@@ -121,8 +130,9 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     if not os.path.isdir('Joblib'):
         os.mkdir('Joblib')
 
-    clf = train(X, is_canceled, RandomForestClassifier, 'is_canceled')
-    clf2 = train(X, adr, RandomForestRegressor, 'adr')
+    n_estimators_list = [i * 100 for i in range(1, 11)]
+    clf = train(X, is_canceled, RandomForestClassifier, n_estimators_list, 'is_canceled')
+    clf2 = train(X, adr, RandomForestRegressor, n_estimators_list, 'adr')
 
     adr = drop_cancel(adr, is_canceled)
     stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
@@ -131,7 +141,8 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     days = drop_cancel(days, is_canceled)
     daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
 
-    clf3 = train(daily_revenue_list, train_y, RandomForestClassifier, 'scale')
+    n_estimators_list = [i for i in range(1, 51)]
+    clf3 = train(daily_revenue_list, train_y, RandomForestClassifier, n_estimators_list, 'scale')
 
     return clf, clf2, clf3
 

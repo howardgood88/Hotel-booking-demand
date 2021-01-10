@@ -8,10 +8,6 @@ from sklearn.preprocessing import LabelEncoder
 ###################################################################
 
 
-def messager(a:str):
-    print("#" * 20, a, "#" * 20)
-
-
 def count_features(df:pd.DataFrame):
     """
         This function computes the valid entries for specified column.
@@ -121,10 +117,6 @@ def add_room_change_feature(df:pd.DataFrame):
     return pd.concat([df, df2], axis=1)
 
 
-def one_hot(df:pd.DataFrame):
-    return pd.get_dummies(df.astype(str))
-
-
 @print_shape_change
 def label_encode(df1:pd.DataFrame, df2:pd.DataFrame):
     '''
@@ -156,15 +148,12 @@ def label_encode(df1:pd.DataFrame, df2:pd.DataFrame):
 ###################################################################
 
 
-feature_predict_cancel = ['is_repeated_guest', 'previous_cancellations', 'previous_bookings_not_canceled', 'deposit_type']
 feature_del            = ['company']
 feature_fillna         = ['agent']
-feature_one_hot        = ['hotel', 'arrival_date_year', 'arrival_date_month', 'arrival_date_day_of_month', 'meal', 'country',
-                        'market_segment', 'distribution_channel', 'reserved_room_type','assigned_room_type', 'deposit_type',
-                        'agent', 'customer_type', 'day_of_the_week']
 feature_label_encode   = ['hotel', 'arrival_date_month', 'meal', 'country',
                         'market_segment', 'distribution_channel', 'reserved_room_type',
                         'assigned_room_type', 'deposit_type', 'customer_type']
+
 
 if __name__ == '__main__':
     train_df = pd.read_csv('Dataset/train_day_of_week.csv')
