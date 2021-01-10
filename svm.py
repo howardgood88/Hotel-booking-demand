@@ -24,10 +24,11 @@ def drop_cancel(X, is_canceled):
     return X[drop_is_canceled]
 
 
-def get_daily_revenue(adr, stay_nights, days):
+def get_daily_revenue(adr:pd.Series, stay_nights:pd.Series, days:pd.DataFrame):
     '''
         Calculate daily revenue.
     '''
+    print('Calculating daily revenue...', end='')
     request_revenue = adr * stay_nights
     daily_revenue = 0
     daily_revenue_list = []
@@ -39,30 +40,36 @@ def get_daily_revenue(adr, stay_nights, days):
             daily_revenue += request_revenue.iloc[idx]
     daily_revenue_list.append(daily_revenue)
     daily_revenue_list = np.array(daily_revenue_list)
-    assert(len(daily_revenue_list) == len(train_y))
 
-    print('daily revenue calculate finished...')
+    print(' Finished')
     return daily_revenue_list[:, np.newaxis]
 
 
 ###################################################################
-#                             Test
+#                           Predict
 ###################################################################
 
 
 def predict(X, clf, clf2, clf3):
+    print('Predicting...')
     is_canceled = clf.predict(X)
     adr = clf2.predict(X)
 
     adr = drop_cancel(adr, is_canceled)
-    stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
+    stay_nights = test_x['stays_in_weekend_nights'] + test_x['stays_in_week_nights']
     stay_nights = drop_cancel(stay_nights, is_canceled)
-    daily_revenue_list = get_daily_revenue(adr, stay_nights)
+    days = test_x.filter(regex=('arrival_date_day_of_month_*'))
+    days = drop_cancel(days, is_canceled)
+    daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
 
     scale = clf3.predict(daily_revenue_list)
+
+    # Output result
+    output_path = 'result.csv'
     result = pd.DataFrame({'label': scale})
     result = pd.concat([test_y, result], axis=1)
-    result.to_csv('result.csv', index=False)
+    result.to_csv(output_path, index=False)
+    print('Predict finished. Result Saved as', output_path)
 
 
 ###################################################################
@@ -121,8 +128,9 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
 ###################################################################
 
 
-drop_features = ['ID', 'is_canceled', 'arrival_date_week_number', 'adr'
+drop_features_train = ['ID', 'is_canceled', 'arrival_date_week_number', 'adr'
     , 'reservation_status', 'reservation_status_date', 'concat_date']
+drop_features_test = ['ID', 'arrival_date_week_number', 'concat_date']
 
 # Read data
 train_x, train_y, test_x, test_y = util.get_data()
@@ -131,8 +139,9 @@ if __name__ == '__main__':
     # Split data
     is_canceled = train_x['is_canceled']
     adr = train_x['adr']
-    X = train_x.drop(drop_features, axis=1)
-    print('Input data shape:', X.shape)
+    X_train = train_x.drop(drop_features_train, axis=1)
+    X_test = test_x.drop(drop_features_test, axis=1)
+    print('Input data shape:', X_train.shape)
 
-    clf, clf2, clf3 = train_main(X, is_canceled, adr, train_y)
-    predict(test_x, clf, clf2, clf3)
+    clf, clf2, clf3 = train_main(X_train, is_canceled, adr, train_y)
+    predict(X_test, clf, clf2, clf3)
