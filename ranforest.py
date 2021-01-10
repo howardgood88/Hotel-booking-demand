@@ -101,7 +101,7 @@ def train(X, y, model, n_estimators_list:list, task:str):
         for n_estimators in n_estimators_list:
             clf = make_pipeline(MinMaxScaler(), model(n_estimators, n_jobs=-1))
             score = make_scorer(mean_absolute_error)
-            val_score = cross_val_score(clf, X, y, cv=5, scoring=score).mean()
+            val_score = cross_val_score(clf, X, y, cv=10, scoring=score).mean()
 
             if val_score < min_val_score:
                 min_val_score = val_score
@@ -130,8 +130,9 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     if not os.path.isdir('Joblib'):
         os.mkdir('Joblib')
 
-    n_estimators_list = [i * 100 for i in range(1, 11)]
+    n_estimators_list = [1500]
     clf = train(X, is_canceled, RandomForestClassifier, n_estimators_list, 'is_canceled')
+    n_estimators_list = [525, 550]
     clf2 = train(X, adr, RandomForestRegressor, n_estimators_list, 'adr')
 
     adr = drop_cancel(adr, is_canceled)
