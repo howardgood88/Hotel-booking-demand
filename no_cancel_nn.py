@@ -91,7 +91,7 @@ for t in range(epochs):
         prediction = model(x_train)
         loss = loss_func(prediction, y_train)
         loss_train.append(loss.detach().numpy())
-        acc = (prediction.reshape(-1).detach().numpy().round() == y_train).mean()
+        acc = (prediction.reshape(-1).detach().numpy().round() == y_train.reshape(-1).detach().numpy()).mean()
         acc_train.append(acc)
         optimizer.zero_grad()
         loss.backward()
@@ -105,7 +105,7 @@ for t in range(epochs):
         prediction = model(x_valid)
         vloss = loss_func(prediction, y_valid)
         loss_valid.append(vloss)
-        vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid).mean()
+        vacc = (prediction.reshape(-1).detach().numpy().round() == y_valid.reshape(-1).detach().numpy()).mean()
         acc_valid.append(vacc)
 
     print('epoch = {}, train_loss = {}, train_acc = {}, valid_loss = {}, valid_acc = {}'.format(t,loss.detach().numpy(),acc,vloss,vacc),end='\r')
