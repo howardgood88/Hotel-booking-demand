@@ -44,6 +44,7 @@ df_train = pd.read_csv('Dataset/train_final.csv')
 df_train.sample(frac=1)
 _ = [df_train.pop(x) for x in not_for_train]
 df_valid = df_train.iloc[81945:, :]
+df_train = df_train.iloc[:81945, :]
 y_df_train = df_train.pop(y_label)
 y_df_valid = df_valid.pop(y_label)
 x_df_train = df_train
@@ -52,7 +53,7 @@ x_df_valid = df_valid
 # _ = [df_test.pop(x) for x in not_for_test]
 # x_df_test = df_test
 
-print(x_df_train.values.shape, y_df_train.values.shape)
+print(x_df_train.values.shape, x_df_valid.values.shape)
 # print('========')
 # print(x_df_test.shape[1])
 
@@ -117,6 +118,8 @@ for t in range(epochs):
     if t % 50 == 0:
         print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,tloss,vloss))
 
+
+torch.save(model.state_dict(),'adr_model.pth')
 
 
 plt.plot(loss_train, label='train_loss')
