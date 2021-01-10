@@ -1,139 +1,173 @@
 import numpy as np
 import pandas as pd
 import util
-import os
-from joblib import dump, load
-from enum import Enum
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from joblib import dump, load
+import os
+from sklearn.metrics import mean_absolute_error, make_scorer
 
-drop_features = ['ID', 'is_canceled', 'arrival_date_week_number', 'adr'
+
+###################################################################
+#                         Utilities
+###################################################################
+
+
+def MAE(y_true, y_pred):
+    return mean_absolute_error(y_true, y_pred)
+
+
+def drop_cancel(X, is_canceled:pd.Series):
+    '''
+        Drop is_cancel by boolean index.
+    '''
+    drop_is_canceled = pd.Series([i != 1 for i in is_canceled])
+    return X[drop_is_canceled]
+
+
+def get_daily_revenue(adr:pd.Series, stay_nights:pd.Series, days:pd.Series):
+    '''
+        Calculate daily revenue.
+    '''
+    print('Calculating daily revenue...', end='')
+    request_revenue = adr * stay_nights
+    daily_revenue = 0
+    daily_revenue_list = []
+    for idx in range(len(days)):
+        if idx > 0 and not days.iloc[idx] == days.iloc[idx-1]:
+            daily_revenue_list.append(daily_revenue)
+            daily_revenue = 0
+        else:
+            daily_revenue += request_revenue.iloc[idx]
+    daily_revenue_list.append(daily_revenue)
+    daily_revenue_list = np.array(daily_revenue_list)
+
+    print(' Finished')
+    return daily_revenue_list[:, np.newaxis]
+
+
+###################################################################
+#                           Predict
+###################################################################
+
+
+def predict(X, clf, clf2, clf3):
+    print('Predicting...')
+    is_canceled = clf.predict(X)
+    print('is_canceled predicting finished')
+    adr = clf2.predict(X)
+    print('adr predicting finished')
+
+    adr = drop_cancel(adr, is_canceled)
+    stay_nights = test_x['stays_in_weekend_nights'] + test_x['stays_in_week_nights']
+    stay_nights = drop_cancel(stay_nights, is_canceled)
+    days = test_x['arrival_date_day_of_month']
+    days = drop_cancel(days, is_canceled)
+    daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
+
+    scale = clf3.predict(daily_revenue_list)
+    print('scale predicting finished')
+
+    # Output result
+    output_path = 'result.csv'
+    result = pd.DataFrame({'label': scale})
+    result = pd.concat([test_y, result], axis=1)
+    result.to_csv(output_path, index=False)
+    print('Predict finished. Result Saved as', output_path)
+
+
+def eval(X, y, clf):
+    y_pred = clf.predict(X)
+    return MAE(y, y_pred)
+
+
+###################################################################
+#                            Train
+###################################################################
+
+
+def train(X, y, model, n_estimators_list:list, task:str):
+    '''
+        Train task by model.
+    '''
+    if os.path.isfile('Joblib/{}.joblib'.format(task)):
+        print('Model {}.joblib detected, loading...'.format(task), end='')
+        clf = load('Joblib/{}.joblib'.format(task))
+        print(' Success')
+    else:
+        min_val_score = float('inf')
+        for n_estimators in n_estimators_list:
+            clf = make_pipeline(MinMaxScaler(), model(n_estimators, n_jobs=-1))
+            score = make_scorer(mean_absolute_error)
+            val_score = cross_val_score(clf, X, y, cv=10, scoring=score).mean()
+
+            if val_score < min_val_score:
+                min_val_score = val_score
+                best_n_estimators = n_estimators
+        print('The n_estimators be chose:', best_n_estimators)
+        print('The minimum validation score:', min_val_score)
+        clf = make_pipeline(MinMaxScaler(), model(best_n_estimators, n_jobs=-1))
+        clf.fit(X, y)
+        print('{} training finished...'.format(task))
+        dump(clf, 'Joblib/{}.joblib'.format(task))
+        print('Model Saved as Joblib/{}.joblib'.format(task))
+
+    y_pred = clf.predict(X)
+    print('{} MAE: {}'.format(task, MAE(y, y_pred)))
+
+    print('--------------------------------------------')
+    return clf
+
+
+def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
+                train_y:pd.Series):
+    '''
+        Main function for training.
+    '''
+    # dir for saving model
+    if not os.path.isdir('Joblib'):
+        os.mkdir('Joblib')
+
+    n_estimators_list = [1500]
+    clf = train(X, is_canceled, RandomForestClassifier, n_estimators_list, 'is_canceled')
+    n_estimators_list = [525, 550]
+    clf2 = train(X, adr, RandomForestRegressor, n_estimators_list, 'adr')
+
+    adr = drop_cancel(adr, is_canceled)
+    stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
+    stay_nights = drop_cancel(stay_nights, is_canceled)
+    days = train_x['arrival_date_day_of_month']
+    days = drop_cancel(days, is_canceled)
+    daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
+
+    n_estimators_list = [i for i in range(1, 51)]
+    clf3 = train(daily_revenue_list, train_y, RandomForestClassifier, n_estimators_list, 'scale')
+
+    return clf, clf2, clf3
+
+
+###################################################################
+#                            Main
+###################################################################
+
+
+drop_features_train = ['ID', 'is_canceled', 'arrival_date_week_number', 'adr'
     , 'reservation_status', 'reservation_status_date', 'concat_date']
+drop_features_test = ['ID', 'arrival_date_week_number', 'concat_date']
 
-class model(Enum):
-    MODEL_IS_CANCELED = "ranforest_is_canceled.joblib"
-    MODEL_ADR         = "ranforest_adr.joblib"
-    MODEL_SCALE       = "ranforest_scale.joblib"
-
-def model_exists(filename, path):
-    if filename in os.listdir(path):
-        return True
-    return False
-
-def get_model(model_name, path):
-    assert(model_name in model)
-    if model_exists(model_name, path):
-        clf = load(os.path.join(path, model_name))
-        print("model {} loading success".format(model_name))
-        return clf
-    return False
+# Read data
+train_x, train_y, test_x, test_y = util.get_data_forest()
 
 
-MODE = 0
-
-if __name__ == '__main__' and MODE:
-    # Read data
-    train_x, train_y, test_x, test_y = util.get_data()
-    scale_label = train_y['label']
-
+if __name__ == '__main__':
     # Split data
     is_canceled = train_x['is_canceled']
     adr = train_x['adr']
-    X = train_x.drop(drop_features, axis=1)
-    print('Input data shape:', X.shape)
+    X_train = train_x.drop(drop_features_train, axis=1)
+    X_test = test_x.drop(drop_features_test, axis=1)
+    print('Input data shape:', X_train.shape)
 
-    # Train is_canceled
-    if os.path.isfile('Joblib/is_canceled.joblib'):
-        print('Model is_canceled.joblib detected, loading...')
-        clf = load('Joblib/is_canceled.joblib')
-        print('Model loaded success.')
-        print('Accuracy is_canceled:', clf.score(X, is_canceled))
-    else:
-        clf = make_pipeline(MinMaxScaler(), RandomForestClassifier(n_estimators=10, verbose=True), verbose=True)
-        clf.fit(X, is_canceled)
-        print('is_canceled training finished...')
-        print('Accuracy is_canceled:', clf.score(X, is_canceled))
-        dump(clf, 'Joblib/is_canceled.joblib')
-        print('Model Saved as Joblib/is_canceled.joblib')
-    print('--------------------------------------------')
-
-    # Train adr
-    if os.path.isfile('Joblib/adr.joblib'):
-        print('Model adr.joblib detected, loading...')
-        clf2 = load('Joblib/adr.joblib')
-        print('Model loaded success.')
-        print('Accuracy adr:', clf2.score(X, adr))
-    else:
-        clf2 = make_pipeline(MinMaxScaler(), RandomForestRegressor(n_estimators=10, verbose=True), verbose=True)
-        clf2.fit(X, adr)
-        print('adr training finished...')
-        print('accuracy adr:', clf2.score(X, adr))
-        dump(clf2, 'Joblib/adr.joblib')
-        print('Model saved as Joblib/adr.joblib')
-    print('--------------------------------------------')
-
-    # Calculate daily revenue
-    stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
-    request_revenue = adr * stay_nights
-    days = train_x.filter(regex=('arrival_date_day_of_month_*'))
-    daily_revenue = 0
-    daily_revenue_list = []
-    for idx in range(len(days)):
-        if idx > 0 and not days.iloc[idx].equals(days.iloc[idx-1]):
-            daily_revenue_list.append(daily_revenue)
-            daily_revenue = 0
-        else:
-            daily_revenue += request_revenue[idx]
-    daily_revenue_list.append(daily_revenue)
-    daily_revenue_list = np.array(daily_revenue_list)
-    assert(len(daily_revenue_list) == len(scale_label))
-    print('daily revenue calculate finished...')
-
-    # Train scale
-    if os.path.isfile('Joblib/scale.joblib'):
-        print('Model scale.joblib detected, loading...')
-        clf3 = load('Joblib/scale.joblib')
-        print('Model loaded success.')
-        print('Accuracy scale:', clf3.score(daily_revenue_list[:, np.newaxis], scale_label))
-    else:
-        clf3 = make_pipeline(MinMaxScaler(), RandomForestClassifier(n_estimators=10, verbose=True), verbose=True)
-        clf3.fit(daily_revenue_list[:, np.newaxis], scale_label)
-        print('scale training finished...')
-        print('accuracy scale:', clf3.score(daily_revenue_list[:, np.newaxis], scale_label))
-        dump(clf3, 'Joblib/scale.joblib')
-        print('Model saved as Joblib/scale.joblib')
-
-if __name__ == '__main__' and MODE != 1:
-    drop_features = ['ID', 'arrival_date_week_number','concat_date']
-    test_x, test_y = util.get_test()
-
-    clf1 = load('Joblib/is_canceled.joblib')
-    clf2 = load('Joblib/adr.joblib')
-    clf3 = load('Joblib/scale.joblib')
-
-    test_x = test_x.drop(drop_features, axis=1)
-    is_canceled = clf1.predict(test_x)
-
-    adr = clf2.predict(test_x)
-    
-    stay_nights = test_x['stays_in_weekend_nights'] + test_x['stays_in_week_nights']
-    request_revenue = adr * stay_nights
-    days = test_x.filter(regex=('arrival_date_day_of_month_*'))
-    daily_revenue = 0
-    daily_revenue_list = []
-    for idx in range(len(days)):
-        if idx > 0 and not days.iloc[idx].equals(days.iloc[idx-1]):
-            daily_revenue_list.append(daily_revenue)
-            daily_revenue = 0
-        else:
-            daily_revenue += request_revenue[idx]
-    daily_revenue_list.append(daily_revenue)
-    daily_revenue_list = np.array(daily_revenue_list)
-    assert(len(daily_revenue_list) == len(test_y))
-    print('daily revenue calculate finished...')
-
-    A = clf3.predict(daily_revenue_list[:, np.newaxis])
-    result = pd.DataFrame({'label': A})
-    r = pd.concat([test_y, result], axis=1)
-    r.to_csv('result.csv', index=False)
+    clf, clf2, clf3 = train_main(X_train, is_canceled, adr, train_y)
+    predict(X_test, clf, clf2, clf3)
