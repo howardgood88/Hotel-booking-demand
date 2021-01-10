@@ -97,9 +97,10 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     clf = train(X, is_canceled, SVC, 'is_canceled')
     clf2 = train(X, adr, SVR, 'adr')
 
-    adr = adr[is_canceled]
+    drop_is_canceled = pd.Series([i != 1 for i in is_canceled])
+    adr = adr[drop_is_canceled]
     stay_nights = train_x['stays_in_weekend_nights'] + train_x['stays_in_week_nights']
-    stay_nights = stay_nights[is_canceled]
+    stay_nights = stay_nights[drop_is_canceled]
     daily_revenue_list = get_daily_revenue(adr, stay_nights)
 
     clf3 = train(daily_revenue_list, train_y, SVC, 'scale')
