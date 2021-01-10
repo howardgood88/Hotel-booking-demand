@@ -116,7 +116,7 @@ def add_room_change_feature(df:pd.DataFrame):
         Add the boolean feature by the change of feature 'reserved_room_type' and 'assigned_room_type'.
     '''
     df2 = df['reserved_room_type'].eq(df['assigned_room_type']).astype(int)
-    df2 = pd.DataFrame(df2, columns=['room_change'])
+    df2 = pd.DataFrame(df2, columns=['room_not_change'])
     return pd.concat([df, df2], axis=1)
 
 
