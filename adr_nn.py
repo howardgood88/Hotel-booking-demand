@@ -66,7 +66,7 @@ print(x_df_train.values.shape, y_df_train.values.shape)
 
 inputDim = x_df_train.shape[1]
 outputDim = 1
-learningRate = 0.001 
+learningRate = 0.0001 
 epochs = 250
 
 model = linearRegression(inputDim, outputDim)

@@ -1,4 +1,4 @@
-from nn_model import linearRegression
+from nn_model import BinaryClassifier
 
 import numpy as np 
 import pandas as pd
@@ -69,7 +69,7 @@ outputDim = 1
 learningRate = 0.0001 
 epochs = 250
 
-model = linearRegression(inputDim, outputDim)
+model = BinaryClassifier(inputDim, outputDim)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
 loss_func = torch.nn.MSELoss()
