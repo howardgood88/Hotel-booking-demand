@@ -53,7 +53,9 @@ def get_daily_revenue(adr:pd.Series, stay_nights:pd.Series, days:pd.DataFrame):
 def predict(X, clf, clf2, clf3):
     print('Predicting...')
     is_canceled = clf.predict(X)
+    print('is_canceled predicting finished')
     adr = clf2.predict(X)
+    print('adr predicting finished')
 
     adr = drop_cancel(adr, is_canceled)
     stay_nights = test_x['stays_in_weekend_nights'] + test_x['stays_in_week_nights']
@@ -63,6 +65,7 @@ def predict(X, clf, clf2, clf3):
     daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
 
     scale = clf3.predict(daily_revenue_list)
+    print('scale predicting finished')
 
     # Output result
     output_path = 'result.csv'
