@@ -62,13 +62,13 @@ print(x_df_train.values.shape, x_df_valid.values.shape)
 inputDim = x_df_train.shape[1]
 outputDim = 1
 learningRate = 0.0001 
-epochs = 250
+epochs = 500
 
 model = linearRegression(inputDim, outputDim)
 print(model)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
-loss_func = torch.nn.L1Loss()
+loss_func = torch.nn.MSELoss()
 
 '''     for batch learning
 trainset = dataset(x_df_train,y_df_train)

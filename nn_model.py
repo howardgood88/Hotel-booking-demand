@@ -49,11 +49,13 @@ class TenClassClassifier(torch.nn.Module):
     def __init__(self, n_feature, n_output):
         super(TenClassClassifier, self).__init__()
         self.linear = nn.Sequential(
-            nn.Linear(n_feature, 10),
-            nn.Tanh(),
-            # nn.Dropout(p=0.3),
-            nn.Linear(10, n_output),
-            # nn.Softmax()
+            nn.BatchNorm1d(n_feature),
+            nn.Linear(n_feature, 20),
+            nn.ReLU(),
+            # nn.Dropout(p=0.5),
+            nn.BatchNorm1d(20),
+            nn.Linear(20, n_output),
+            nn.Sigmoid()
         )
 
     def forward(self, x):

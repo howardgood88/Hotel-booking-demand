@@ -70,7 +70,7 @@ print(x_df_train.values.shape, x_df_valid.values.shape)
 inputDim = x_df_train.shape[1]
 outputDim = 1
 learningRate = 0.0001 
-epochs = 250
+epochs = 150
 
 model = BinaryClassifier(inputDim, outputDim)
 print(model)

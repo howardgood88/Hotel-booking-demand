@@ -30,7 +30,7 @@ def get_model(model_name, path):
     return False
 
 
-MODE = 0
+MODE = 1
 
 if __name__ == '__main__' and MODE:
     # Read data
