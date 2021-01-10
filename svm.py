@@ -92,14 +92,14 @@ def train(X, y, model, task:str, verbose:bool=0):
         print('Model Saved as Joblib/{}.joblib'.format(task))
 
     if verbose:
-        print('Accuracy {}:'.format(task, clf.score(X, y)))
+        print('Accuracy {}: {}'.format(task, clf.score(X, y)))
 
     print('--------------------------------------------')
     return clf
 
 
-def train_main(X:pd.Dataframe, is_canceled:pd.series, adr:pd.series,
-                train_y:pd.series):
+def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
+                train_y:pd.Series):
     '''
         Main function for training.
     '''
@@ -138,5 +138,5 @@ if __name__ == '__main__':
     X = train_x.drop(drop_features, axis=1)
     print('Input data shape:', X.shape)
 
-    clf, clf2, clf3 = train(X, is_canceled, adr, train_y)
+    clf, clf2, clf3 = train_main(X, is_canceled, adr, train_y)
     predict(test_x, clf, clf2, clf3)
