@@ -97,14 +97,14 @@ adr_test = prediction.detach().numpy()
 
 adr_test = pd.DataFrame({'adr': adr_test.reshape(-1)})
 
-print('adr: ',adr_test)
+# print('adr: ',adr_test)
 print('adr shape: ',adr_test.shape)
 
 df_test = pd.read_csv('Dataset/test_final.csv')
 
 x_df_test = pd.concat([df_test,is_cancel_test,adr_test], axis=1)
 
-# x_df_test = drop_cancel(x_df_test, x_df_test['is_canceled'])
+x_df_test = drop_cancel(x_df_test, x_df_test['is_canceled'])
 
 print('x_df_test shape: ',x_df_test.shape)
 
@@ -113,8 +113,10 @@ np_test = get_daily_revenue(
     x_df_test['stays_in_weekend_nights'] + x_df_test['stays_in_week_nights'],
     x_df_test.filter(regex=('arrival_date_day_of_month_*')))
 
+print('Scale np_test: ',np_test)
 print('Scale np_test shape: ',np_test.shape)
 
+'''
 inputDim = 1
 outputDim = 1
 model = TenClassClassifier(inputDim, outputDim)
@@ -128,8 +130,27 @@ result = torch.argmax(prediction, dim=1).reshape(-1).detach().numpy().round()
 
 print('Result shape: ', result.shape)
 
-
 no_label_test = pd.read_csv('Dataset/test_nolabel.csv')
 result = pd.DataFrame({'label': result})
+r = pd.concat([no_label_test, result], axis=1)
+r.to_csv('result.csv', index=False)
+'''
+
+
+import numpy as np
+import pandas as pd
+import util
+import os
+from joblib import dump, load
+from enum import Enum
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.pipeline import make_pipeline
+
+
+clf3 = load('Joblib/scale.joblib')
+A = clf3.predict(np_test)
+result = pd.DataFrame({'label': A})
+no_label_test = pd.read_csv('Dataset/test_nolabel.csv')
 r = pd.concat([no_label_test, result], axis=1)
 r.to_csv('result.csv', index=False)

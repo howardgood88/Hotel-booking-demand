@@ -50,22 +50,14 @@ y_df_valid = df_valid.pop(y_label)
 x_df_train = df_train
 x_df_valid = df_valid
 
-# _ = [df_test.pop(x) for x in not_for_test]
-# x_df_test = df_test
 
 print(x_df_train.values.shape, x_df_valid.values.shape)
-# print('========')
-# print(x_df_test.shape[1])
 
 
 #################################################################
 #                       Training ADR
 #################################################################
 
-
-# if x_df_test.shape[1] != x_df_train.shape[1]:
-#     import sys
-#     sys.exit('Shape unmatch')
 
 inputDim = x_df_train.shape[1]
 outputDim = 1

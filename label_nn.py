@@ -6,9 +6,9 @@ import torch
 from torch.autograd import Variable
 import matplotlib.pyplot as plt
 
-#################################################################
-#                       Utilities
-#################################################################
+# #################################################################
+# #                       Utilities
+# #################################################################
 
 
 np.random.seed(987)
@@ -44,9 +44,9 @@ def get_daily_revenue(adr:pd.Series, stay_nights:pd.Series, days:pd.DataFrame):
     return daily_revenue_list[:, np.newaxis]
 
 
-#################################################################
-#                       Reading Data
-#################################################################
+# #################################################################
+# #                       Reading Data
+# #################################################################
 
 
 y_label ='label'
@@ -62,92 +62,124 @@ np_train = get_daily_revenue(
     df_train['stays_in_weekend_nights'] + df_train['stays_in_week_nights'],
     df_train.filter(regex=('arrival_date_day_of_month_*')))
 
-np_label = df_train_label[y_label].to_numpy()
-print(np_label, np_label.shape)
+np_label = df_train_label[y_label]
+# np_label = df_train_label[y_label].to_numpy()
+# print(np_label, np_label.shape)
 
 
-x_np_train = np_train.reshape(-1,1)
-y_np_train = np_label.reshape(-1,1)
+# x_np_train = np_train.reshape(-1,1)
+# y_np_train = np_label.reshape(-1,1)
 
 
-# np_data = np.concatenate((np_train.reshape(-1,1), np_label.reshape(-1,1)), axis=1)
-# np.random.shuffle(np_data)
+# # np_data = np.concatenate((np_train.reshape(-1,1), np_label.reshape(-1,1)), axis=1)
+# # np.random.shuffle(np_data)
 
-# x_np_train = np_data[:576,0]
-# x_np_valid = np_data[576:,0]
+# # x_np_train = np_data[:576,0]
+# # x_np_valid = np_data[576:,0]
 
-# y_np_train = np_data[:576,1]
-# y_np_valid = np_data[576:,1]
+# # y_np_train = np_data[:576,1]
+# # y_np_valid = np_data[576:,1]
 
-# y_oh_train = np.eye(class_num)[y_np_train.astype(int)]
-# y_oh_valid = np.eye(class_num)[y_np_valid.astype(int)]
+# # y_oh_train = np.eye(class_num)[y_np_train.astype(int)]
+# # y_oh_valid = np.eye(class_num)[y_np_valid.astype(int)]
 
-# print(x_np_train.shape, y_oh_train.shape, x_np_valid.shape, y_oh_valid.shape)
-
-
-#################################################################
-#                       Training Label(Scale)
-#################################################################
+# # print(x_np_train.shape, y_oh_train.shape, x_np_valid.shape, y_oh_valid.shape)
 
 
-inputDim = 1
-outputDim = 1
-learningRate = 0.0001 
-epochs = 100
-
-model = TenClassClassifier(inputDim, outputDim)
-print(model)
-optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
-loss_func = torch.nn.L1Loss()
-
-loss_train = []
-loss_valid = []
-acc_train = []
-acc_valid = []
-for t in range(epochs):
-
-    model.train()
-    x_train = Variable(torch.from_numpy(x_np_train).float())
-    y_train = Variable(torch.from_numpy(y_np_train).float())
-    # x_train = x_train.view(-1,1)
-    # y_train = y_train.view(-1,1)
-    prediction = model(x_train)
-    print(prediction.detach().numpy().round().reshape(1,-1))
-    # print(y_train, y_train.shape, prediction.shape)
-    loss = loss_func(prediction, y_train)
-    tloss = loss.detach().numpy()
-    loss_train.append(tloss)
-    # print(torch.argmax(prediction, dim=1).reshape(-1).detach().numpy().shape, y_np_train.reshape(-1).shape)
-    acc = (torch.argmax(prediction, dim=1).reshape(-1).detach().numpy().round() == y_np_train.reshape(-1)).mean()
-    acc_train.append(acc)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()
-
-    # model.eval()
-    # x_valid = Variable(torch.from_numpy(x_np_valid).float())
-    # y_valid = Variable(torch.from_numpy(y_oh_valid).float())
-    # x_valid = x_valid.view(-1,1)
-    # # y_valid = y_valid.view(-1,1)
-    # prediction = model(x_valid)
-    # print(prediction.detach().numpy())
-    # vloss = loss_func(prediction, y_valid)
-    # vloss = vloss.detach().numpy()
-    # loss_valid.append(vloss)
-    # vacc = (torch.argmax(prediction, dim=1).reshape(-1).detach().numpy() == y_np_valid.reshape(-1)).mean()
-    # acc_valid.append(vacc)
-
-    # if t % 50 == 0:
-    #     print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,tloss,vloss))
-
-    # if t % 50 == 0:
-    print('epoch = {}, train_loss = {}'.format(t,tloss),end='\r')
+# #################################################################
+# #                       Training Label(Scale)
+# #################################################################
 
 
-torch.save(model.state_dict(),'label_model.pth')
+# inputDim = 1
+# outputDim = 1
+# learningRate = 0.001 
+# epochs = 100
 
-print(loss_train, acc_train)
-plt.plot(loss_train, label='train_loss')
-plt.plot(acc_train, label='acc_train')
-plt.legend(loc='best')
-plt.show()
+# model = TenClassClassifier(inputDim, outputDim)
+# print(model)
+# optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
+# loss_func = torch.nn.MSELoss()
+
+# loss_train = []
+# loss_valid = []
+# acc_train = []
+# acc_valid = []
+# for t in range(epochs):
+
+#     model.train()
+#     x_train = Variable(torch.from_numpy(x_np_train).float())
+#     y_train = Variable(torch.from_numpy(y_np_train).float())
+#     x_train = x_train.view(-1,1)
+#     # y_train = y_train.view(-1,1)
+#     prediction = model(x_train)
+#     # print(prediction.detach().numpy().round().reshape(1,-1))
+#     # print(y_train, y_train.shape, prediction.shape)
+#     loss = loss_func(prediction, y_train)
+#     tloss = loss.detach().numpy()
+#     loss_train.append(tloss)
+#     # print(torch.argmax(prediction, dim=1).reshape(-1).detach().numpy().shape, y_np_train.reshape(-1).shape)
+#     acc = (torch.argmax(prediction, dim=1).reshape(-1).detach().numpy().round() == y_np_train.reshape(-1)).mean()
+#     acc_train.append(acc)
+#     optimizer.zero_grad()
+#     loss.backward()
+#     optimizer.step()
+
+#     # model.eval()
+#     # x_valid = Variable(torch.from_numpy(x_np_valid).float())
+#     # y_valid = Variable(torch.from_numpy(y_oh_valid).float())
+#     # x_valid = x_valid.view(-1,1)
+#     # # y_valid = y_valid.view(-1,1)
+#     # prediction = model(x_valid)
+#     # print(prediction.detach().numpy())
+#     # vloss = loss_func(prediction, y_valid)
+#     # vloss = vloss.detach().numpy()
+#     # loss_valid.append(vloss)
+#     # vacc = (torch.argmax(prediction, dim=1).reshape(-1).detach().numpy() == y_np_valid.reshape(-1)).mean()
+#     # acc_valid.append(vacc)
+
+#     # if t % 50 == 0:
+#     #     print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,tloss,vloss))
+
+#     # if t % 50 == 0:
+#     print('epoch = {}, train_loss = {}'.format(t,tloss),end='\r')
+
+
+# torch.save(model.state_dict(),'label_model.pth')
+
+# print(loss_train, acc_train)
+# plt.plot(loss_train, label='train_loss')
+# plt.plot(acc_train, label='acc_train')
+# plt.legend(loc='best')
+# plt.show()
+
+
+'''
+#####################################################################
+'''
+
+
+import numpy as np
+import pandas as pd
+import util
+import os
+from joblib import dump, load
+from enum import Enum
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.pipeline import make_pipeline
+
+
+# Train scale
+if os.path.isfile('Joblib/scale.joblib'):
+    print('Model scale.joblib detected, loading...')
+    clf3 = load('Joblib/scale.joblib')
+    print('Model loaded success.')
+    print('Accuracy scale:', clf3.score(np_train, np_label))
+else:
+    clf3 = make_pipeline(MinMaxScaler(), RandomForestClassifier(n_estimators=10, verbose=True), verbose=True)
+    clf3.fit(np_train, np_label)
+    print('scale training finished...')
+    print('accuracy scale:', clf3.score(np_train, np_label))
+    dump(clf3, 'Joblib/scale.joblib')
+    print('Model saved as Joblib/scale.joblib')

@@ -50,7 +50,7 @@ class TenClassClassifier(torch.nn.Module):
         super(TenClassClassifier, self).__init__()
         self.linear = nn.Sequential(
             nn.Linear(n_feature, 10),
-            # nn.ReLU(),
+            nn.Tanh(),
             # nn.Dropout(p=0.3),
             nn.Linear(10, n_output),
             # nn.Softmax()
