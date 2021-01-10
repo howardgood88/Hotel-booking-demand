@@ -13,8 +13,10 @@ class linearRegression(torch.nn.Module):
             nn.Linear(n_hidden, n_hidden),
             nn.ReLU(),
             nn.Linear(n_hidden, n_hidden),
-            nn.Linear(n_hidden, n_output),
-            nn.Dropout(p=0.3))
+            nn.Dropout(p=0.3),
+            nn.Linear(n_hidden, n_output)
+        )
+            
 
     def forward(self, x):
         out = self.linear(x)
