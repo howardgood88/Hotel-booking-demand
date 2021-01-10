@@ -56,7 +56,7 @@ print(x_df_train.values.shape, y_df_train.values.shape)
 
 
 #################################################################
-#                       Training Is_canceled
+#                       Training ADR
 #################################################################
 
 
@@ -66,13 +66,13 @@ print(x_df_train.values.shape, y_df_train.values.shape)
 
 inputDim = x_df_train.shape[1]
 outputDim = 1
-learningRate = 0.0001 
-epochs = 300
+learningRate = 0.001 
+epochs = 250
 
 model = linearRegression(inputDim, outputDim)
 optimizer = torch.optim.Adam(model.parameters(), lr=learningRate)
 # loss_func = torch.nn.BCEWithLogitsLoss()
-loss_func = torch.nn.MSELoss()
+loss_func = torch.nn.L1Loss()
 
 '''     for batch learning
 trainset = dataset(x_df_train,y_df_train)
@@ -93,7 +93,8 @@ for t in range(epochs):
     y_train = y_train.view(-1,1)
     prediction = model(x_train)
     loss = loss_func(prediction, y_train)
-    loss_train.append(loss.detach().numpy())
+    tloss = loss.detach().numpy()
+    loss_train.append(tloss)
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
@@ -107,10 +108,11 @@ for t in range(epochs):
     y_valid = y_valid.view(-1,1)
     prediction = model(x_valid)
     vloss = loss_func(prediction, y_valid)
+    vloss = vloss.detach().numpy()
     loss_valid.append(vloss)
 
     if t % 50 == 0:
-        print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,loss.detach().numpy(),vloss))
+        print('epoch = {}, train_loss = {}, valid_loss = {}'.format(t,tloss,vloss))
 
 
 
