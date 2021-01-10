@@ -16,7 +16,7 @@ import os
 ###################################################################
 
 
-def drop_cancel(X, is_canceled):
+def drop_cancel(X, is_canceled:pd.Series):
     '''
         Drop is_cancel by boolean index.
     '''
@@ -86,7 +86,7 @@ def train(X, y, model, task:str, verbose:bool=0):
         clf = load('Joblib/{}.joblib'.format(task))
         print(' Success')
     else:
-        clf = make_pipeline(MinMaxScaler(), model(max_iter=10, verbose=True), verbose=True)
+        clf = make_pipeline(MinMaxScaler(), model(verbose=True), verbose=True)
         clf.fit(X, y)
         print('{} training finished...'.format(task))
         dump(clf, 'Joblib/{}.joblib'.format(task))
