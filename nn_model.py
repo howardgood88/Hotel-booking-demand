@@ -61,3 +61,30 @@ class TenClassClassifier(torch.nn.Module):
     def forward(self, x):
         out = self.linear(x)
         return out
+
+
+# label model structure
+class ClassClassifier(torch.nn.Module):
+    def __init__(self, n_feature, n_output):
+        super(ClassClassifier, self).__init__()
+        self.linear = nn.Sequential(
+            nn.BatchNorm1d(n_feature),
+            nn.Linear(n_feature, 600),
+            nn.ReLU(),
+            nn.BatchNorm1d(600),
+            nn.Linear(600, 600),
+            nn.ReLU(),
+            nn.BatchNorm1d(600),
+            nn.Linear(600, 1200),
+            nn.ReLU(),
+            # nn.BatchNorm1d(1200),
+            # nn.Linear(1200, 1200),
+            # nn.ReLU(),
+            nn.BatchNorm1d(1200),
+            nn.Linear(1200, n_output),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        out = self.linear(x)
+        return out
