@@ -184,6 +184,8 @@ feature_label_encode   = ['hotel', 'arrival_date_month', 'meal', 'country',
                         'market_segment', 'distribution_channel', 'reserved_room_type',
                         'assigned_room_type', 'deposit_type', 'customer_type']
 
+# PLEASE CHANGE THE ENCODING MODE YOU WANT!!
+# 'label_encode' or 'one_hot'
 encoding_mode = 'label_encode'
 
 if __name__ == '__main__':
@@ -209,5 +211,5 @@ if __name__ == '__main__':
     else:
         raise NameError('Wrong encoding mode name:', encoding_mode)
 
-    train_df.to_csv('Dataset/train_final.csv', index=False)
-    test_df.to_csv('Dataset/test_final.csv', index=False)
+    train_df.to_csv('Dataset/train_final_' + encoding_mode + '.csv', index=False)
+    test_df.to_csv('Dataset/test_final_' + encoding_mode + '.csv', index=False)

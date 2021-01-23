@@ -132,7 +132,7 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
 
     n_estimators_list = [1500]
     clf = train(X, is_canceled, RandomForestClassifier, n_estimators_list, 'is_canceled')
-    n_estimators_list = [525, 550]
+    n_estimators_list = [550]
     clf2 = train(X, adr, RandomForestRegressor, n_estimators_list, 'adr')
 
     adr = drop_cancel(adr, is_canceled)
@@ -142,7 +142,7 @@ def train_main(X:pd.DataFrame, is_canceled:pd.Series, adr:pd.Series,
     days = drop_cancel(days, is_canceled)
     daily_revenue_list = get_daily_revenue(adr, stay_nights, days)
 
-    n_estimators_list = [i for i in range(1, 51)]
+    n_estimators_list = [i for i in range(20)]
     clf3 = train(daily_revenue_list, train_y, RandomForestClassifier, n_estimators_list, 'scale')
 
     return clf, clf2, clf3
@@ -158,7 +158,7 @@ drop_features_train = ['ID', 'is_canceled', 'arrival_date_week_number', 'adr'
 drop_features_test = ['ID', 'arrival_date_week_number', 'concat_date']
 
 # Read data
-train_x, train_y, test_x, test_y = util.get_data_forest()
+train_x, train_y, test_x, test_y = util.get_data()
 
 
 if __name__ == '__main__':
